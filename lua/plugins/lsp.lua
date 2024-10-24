@@ -116,6 +116,9 @@ return {
 					'mail',
 				},
 			}
+			require'lspconfig'.superhtml.setup {
+				filetypes = { 'superhtml', 'html' }
+			}
 			lspconfig.clangd.setup {}
 			lspconfig.gleam.setup {}
 			lspconfig.gopls.setup {

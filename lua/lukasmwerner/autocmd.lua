@@ -11,7 +11,16 @@ autocmd('LspAttach', {
 		--vim.keymap.set("n", "<leader>a", function() vim.lsp.buf.code_action() end, opts)
 		vim.keymap.set("n", "<leader>rn", function() vim.lsp.buf.rename() end, opts)
 		vim.keymap.set("n", "<leader>cf", function ()
-			
 		end, opts)
 	end,
 })
+
+-- Trailing whitespace visualization
+vim.api.nvim_set_hl(0, 'TrailingWhitespace', { bg='#E67E80' })
+autocmd('BufEnter', {
+	pattern = '*',
+	command = [[
+		syntax clear TrailingWhitespace |
+		syntax match TrailingWhitespace "\_s\+$"
+	]]}
+)
