@@ -20,26 +20,43 @@ return {
 		}
 	},
 	{
+		'saghen/blink.cmp',
+		dependencies = 'rafamadriz/friendly-snippets',
+		version = '*',
+		---@module 'blink.cmp'
+		---@type blink.cmp.Config
+		opts = {
+			keymap = { preset = 'default' },
+			signature = { enabled = true },
+			appearance = {
+				use_nvim_cmp_as_default = true,
+				nerd_font_variant = 'mono'
+			},
+			sources = {
+				default = { 'lsp', 'path', 'snippets', 'buffer' },
+			},
+		},
+		opts_extend = { "sources.default" }
+	},
+	{
 		"neovim/nvim-lspconfig",
 		dependencies = {
 			"williamboman/mason.nvim",
 			"williamboman/mason-lspconfig.nvim",
-			"hrsh7th/cmp-nvim-lsp",
-			"hrsh7th/cmp-buffer",
-			"hrsh7th/cmp-path",
-			"hrsh7th/cmp-cmdline",
-			"hrsh7th/nvim-cmp",
-			"L3MON4D3/LuaSnip",
-			"saadparwaiz1/cmp_luasnip",
+			"saghen/blink.cmp",
+			{ -- make lsp experience for nvim config itself better
+				"folke/lazydev.nvim",
+				ft = "lua", -- only load on lua files
+				opts = {
+					library = {
+						{ path = "${3rd}/luv/library", words = { "vim%.uv" } },
+					},
+				},
+			},
 		},
 		config = function()
-			local cmp = require('cmp')
-			local cmp_lsp = require("cmp_nvim_lsp")
-			local capabilities = vim.tbl_deep_extend(
-				"force",
-				{},
-				vim.lsp.protocol.make_client_capabilities(),
-				cmp_lsp.default_capabilities())
+			local lspconfig = require('lspconfig')
+			local capabilities = require('blink.cmp').get_lsp_capabilities()
 
 			--setup lsp servers
 			require("mason").setup()
@@ -47,25 +64,12 @@ return {
 				ensure_installed = {
 					"lua_ls",
 					"gopls",
+					"tinymist"
 				},
 				handlers = {
 					function(server_name) -- default handler (auto provides our capabilities)
 						require("lspconfig")[server_name].setup {
 							capabilities = capabilities
-						}
-					end,
-					["lua_ls"] = function() -- lua handler fix the config for vim
-						local lspconfig = require("lspconfig")
-						lspconfig.lua_ls.setup {
-							capabilities = capabilities,
-							settings = {
-								Lua = {
-									runtime = { version = "Lua 5.1" },
-									diagnostics = {
-										globals = { "vim", "it", "describe", "before_each", "after_each" },
-									}
-								}
-							}
 						}
 					end,
 					["html"] = function ()
@@ -82,22 +86,14 @@ return {
 							filetypes = { "html", "templ" },
 						}
 					end,
-					["tailwindcss"] = function ()
-						local lspconfig = require("lspconfig")
-						lspconfig.tailwindcss.setup({
-							capabilities = capabilities,
-							filetypes = { "templ", "astro", "javascript", "typescript", "react" },
-							init_options = { userLanguages = { templ = "html" } },
-						})
-					end,
 				},
 			}) -- end mason-lspconfig setup
 
 			-- manual server install
-			local lspconfig = require("lspconfig")
 			lspconfig.harper_ls.setup{
 				filetypes = {
 					'html',
+					'typst',
 					'gitcommit',
 					'markdown',
 					'rust',
@@ -116,11 +112,12 @@ return {
 					'mail',
 				},
 			}
-			require'lspconfig'.superhtml.setup {
+			lspconfig.superhtml.setup {
 				filetypes = { 'superhtml', 'html' }
 			}
 			lspconfig.clangd.setup {}
 			lspconfig.gleam.setup {}
+			lspconfig.denols.setup {}
 			lspconfig.gopls.setup {
 				filetypes = {
 					"go",
@@ -136,26 +133,6 @@ return {
 				},
 			}
 
-			cmp.setup({
-				snippet = {
-					expand = function(args)
-						require('luasnip').lsp_expand(args.body)
-					end,
-				},
-				mapping = cmp.mapping.preset.insert({
-					['<C-b>'] = cmp.mapping.scroll_docs(-4),
-					['<C-f>'] = cmp.mapping.scroll_docs(4),
-					['<C-Space>'] = cmp.mapping.complete(),
-					['<C-e>'] = cmp.mapping.abort(),
-					['<CR>'] = cmp.mapping.confirm({ select = true }), -- Accept currently selected item. Set `select` to `false` to only confirm explicitly selected items.
-				}),
-				sources = cmp.config.sources({
-					{name = 'nvim_lsp'},
-					{ name = 'luasnip'},
-				}, {
-						{name = 'buffer' },
-					}),
-			})
 
 			vim.diagnostic.config({
 				virtual_text = true,
@@ -166,31 +143,6 @@ return {
 				float = true,
 			})
 
-		end,
-	},
-	{
-		-- TODO: we need to fix this
-		'sbdchd/neoformat',
-		config = function ()
-			vim.api.nvim_create_autocmd({'BufWritePre'}, {
-				pattern = {'*'},
-				callback = function (ev)
-					-- Get the current buffer's file name
-					local bufname = vim.api.nvim_buf_get_name(ev.buf)
-
-					-- Ensure UNIX file format
-					vim.api.nvim_command('set ff=unix')
-
-					-- Check if the file ends with ".slides.md"
-					if string.match(bufname, "%.slides%.md$") then
-						return
-					end
-
-					-- Otherwise run neoformat aka lsp formatter on the buffer
-					vim.api.nvim_command('undojoin')
-					vim.api.nvim_command('Neoformat')
-				end,
-			})
 		end,
 	},
 	{

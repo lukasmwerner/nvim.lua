@@ -32,4 +32,10 @@ return {
 		},
 	},
 	{ 'glacambre/firenvim', build = ":call firenvim#install(0)" },
+		{
+		"mbbill/undotree",
+		keys = {
+			{ "<leader>u", "<cmd>UndotreeToggle<cr>" },
+		},
+	},
 }
