@@ -1,9 +1,18 @@
 return {
 	{
 		'nvim-lualine/lualine.nvim',
-		dependencies = { 'nvim-tree/nvim-web-devicons' },
+		dependencies = { 'nvim-tree/nvim-web-devicons', 'milanglacier/minuet-ai.nvim' },
 		lazy = false,
-		opts = {},
+		opts = {
+			sections = {
+				lualine_x = {
+					require('minuet.lualine'),
+					'encoding',
+					'fileformat',
+					'filetype',
+				},
+			},
+		},
 	},
 	{
 		'alvarosevilla95/luatab.nvim',

@@ -21,7 +21,12 @@ return {
 	},
 	{
 		'saghen/blink.cmp',
-		dependencies = 'rafamadriz/friendly-snippets',
+		dependencies = {
+			'rafamadriz/friendly-snippets',
+			"giuxtaposition/blink-cmp-copilot",
+			"mikavilpas/blink-ripgrep.nvim",
+			"moyiz/blink-emoji.nvim",
+		},
 		version = '*',
 		---@module 'blink.cmp'
 		---@type blink.cmp.Config
@@ -30,13 +35,83 @@ return {
 			signature = { enabled = true },
 			appearance = {
 				use_nvim_cmp_as_default = true,
-				nerd_font_variant = 'mono'
+				nerd_font_variant = 'mono',
+				kind_icons = {
+					Ollama = '',
+					ripgrep = ''
+				},
 			},
 			sources = {
-				default = { 'lsp', 'path', 'snippets', 'buffer' },
+				default = { 'emoji', 'lsp', 'path', 'snippets', 'buffer', 'ripgrep', 'minuet' },
+				providers = {
+					emoji = {
+						module = "blink-emoji",
+						name = "Emoji",
+						score_offset = 15,
+						opts = { insert = true }, -- Insert emoji (default) or complete its name
+						should_show_items = function()
+							return vim.tbl_contains(
+							-- Enable emoji completion only for git commits and markdown.
+							-- By default, enabled for all file-types.
+								{ "gitcommit", "markdown" },
+								vim.o.filetype
+							)
+						end,
+					},
+					ripgrep = {
+						module = "blink-ripgrep",
+						name = "Ripgrep",
+						transform_items = function(_, items)
+							for _, item in ipairs(items) do
+								-- example: append a description to easily distinguish rg results
+								item.labelDetails = {
+									description = "(rg)",
+								}
+								item.kind_name = 'ripgrep'
+							end
+							return items
+						end,
+					},
+					minuet = {
+						name = 'minuet',
+						module = 'minuet.blink',
+						score_offset = 2,
+					},
+					copilot = {
+						name = "copilot",
+						module = "blink-cmp-copilot",
+						async = true,
+					},
+				},
 			},
 		},
 		opts_extend = { "sources.default" }
+	},
+	{
+		"xzbdmw/colorful-menu.nvim",
+		config = function()
+			require("blink.cmp").setup({
+				completion = {
+					menu = {
+						draw = {
+							-- We don't need label_description now because label and label_description are already
+							-- combined together in label by colorful-menu.nvim.
+							columns = { { "kind_icon" }, { "label", gap = 1 } },
+							components = {
+								label = {
+									text = function(ctx)
+										return require("colorful-menu").blink_components_text(ctx)
+									end,
+									highlight = function(ctx)
+										return require("colorful-menu").blink_components_highlight(ctx)
+									end,
+								},
+							},
+						},
+					},
+				},
+			})
+		end
 	},
 	{
 		"neovim/nvim-lspconfig",
@@ -44,7 +119,7 @@ return {
 			"williamboman/mason.nvim",
 			"williamboman/mason-lspconfig.nvim",
 			"saghen/blink.cmp",
-			{ -- make lsp experience for nvim config itself better
+			{   -- make lsp experience for nvim config itself better
 				"folke/lazydev.nvim",
 				ft = "lua", -- only load on lua files
 				opts = {
@@ -72,14 +147,14 @@ return {
 							capabilities = capabilities
 						}
 					end,
-					["html"] = function ()
+					["html"] = function()
 						local lspconfig = require("lspconfig")
 						lspconfig.html.setup {
 							capabilities = capabilities,
 							filetypes = { "html", "templ" },
 						}
 					end,
-					["htmx"] = function ()
+					["htmx"] = function()
 						local lspconfig = require("lspconfig")
 						lspconfig.htmx.setup {
 							capabilities = capabilities,
@@ -90,7 +165,7 @@ return {
 			}) -- end mason-lspconfig setup
 
 			-- manual server install
-			lspconfig.harper_ls.setup{
+			lspconfig.harper_ls.setup {
 				filetypes = {
 					'html',
 					'typst',
@@ -115,6 +190,7 @@ return {
 			lspconfig.superhtml.setup {
 				filetypes = { 'superhtml', 'html' }
 			}
+			lspconfig.templ.setup {}
 			lspconfig.clangd.setup {}
 			lspconfig.gleam.setup {}
 			lspconfig.denols.setup {}
@@ -132,6 +208,17 @@ return {
 					"gotmpl"
 				},
 			}
+			lspconfig.tailwindcss.setup({
+				capabilities = capabilities,
+				filetypes = { "templ", "astro", "javascript", "typescript", "react" },
+				settings = {
+					tailwindCSS = {
+						includeLanguages = {
+							templ = "html",
+						},
+					},
+				},
+			})
 
 
 			vim.diagnostic.config({
@@ -142,7 +229,6 @@ return {
 				severity_sort = true,
 				float = true,
 			})
-
 		end,
 	},
 	{
@@ -156,7 +242,7 @@ return {
 				desc = "Diagnostics (Trouble)",
 			},
 			{
-			"<leader>xX",
+				"<leader>xX",
 				"<cmd>Trouble diagnostics toggle filter.buf=0<cr>",
 				desc = "Buffer Diagnostics (Trouble)",
 			},
@@ -171,7 +257,7 @@ return {
 				desc = "LSP Definitions / references / ... (Trouble)",
 			},
 			{
-			"<leader>xL",
+				"<leader>xL",
 				"<cmd>Trouble loclist toggle<cr>",
 				desc = "Location List (Trouble)",
 			},

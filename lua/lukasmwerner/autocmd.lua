@@ -12,6 +12,18 @@ autocmd('LspAttach', {
 		vim.keymap.set("n", "<leader>rn", function() vim.lsp.buf.rename() end, opts)
 		vim.keymap.set("n", "<leader>cf", function ()
 		end, opts)
+
+		local client = vim.lsp.get_client_by_id(e.data.client_id)
+		if not client then return end
+
+		if client.supports_method('textDocument/formatting') then
+			vim.api.nvim_create_autocmd('BufWritePre', {
+				buffer = e.buf,
+				callback = function ()
+					vim.lsp.buf.format({bufnr = e.buf, id = client.id})
+				end
+			})
+		end
 	end,
 })
 
@@ -24,3 +36,5 @@ autocmd('BufEnter', {
 		syntax match TrailingWhitespace "\_s\+$"
 	]]}
 )
+
+

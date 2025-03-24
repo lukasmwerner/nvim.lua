@@ -19,3 +19,7 @@ vim.keymap.set("v", "K", ":m '<-2<CR>gv=gv")
 
 vim.keymap.set("n", "gni", vim.diagnostic.goto_next)
 vim.keymap.set("n", "gpi", vim.diagnostic.goto_prev)
+
+vim.keymap.set('v', '<leader>sc', function()
+	print("hello world!")
+end, { desc = 'Count sentences in selection' })
