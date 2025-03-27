@@ -15,7 +15,8 @@ return {
 		'milanglacier/minuet-ai.nvim',
 		config = function()
 			require('minuet').setup {
-				provider = 'openai_fim_compatible',
+				--provider = 'openai_fim_compatible',
+				provider = 'gemini',
 				n_completions = 1, -- recommend for local model for resource saving
 				-- I recommend beginning with a small context window size and incrementally
 				-- expanding it, depending on your local computing power. A context window
@@ -34,6 +35,23 @@ return {
 							top_p = 0.9,
 						},
 					},
+					gemini = {
+						model = 'gemini-2.0-flash',
+						stream = true,
+						api_key = 'GEMINI_API_KEY',
+						optional = {},
+					},
+					openai_compatible = {
+						model = 'llama-3.3-70b-versatile',
+						end_point = 'https://api.groq.com/openai/v1/chat/completions',
+						api_key = 'GROQ_API_KEY',
+						name = 'Groq',
+						stream = true,
+						optional = {
+							stop = nil,
+							max_tokens = nil,
+						},
+					}
 				},
 			}
 		end,

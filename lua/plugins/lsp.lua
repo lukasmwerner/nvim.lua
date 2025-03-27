@@ -38,6 +38,7 @@ return {
 				nerd_font_variant = 'mono',
 				kind_icons = {
 					Ollama = '',
+					gemini = '',
 					ripgrep = ''
 				},
 			},
@@ -222,7 +223,8 @@ return {
 
 
 			vim.diagnostic.config({
-				virtual_text = true,
+				--virtual_text = true,
+				virtual_lines = true, -- This one is better than virtual_text IMHO
 				signs = true,
 				update_in_insert = false,
 				underline = true,
