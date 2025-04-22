@@ -43,7 +43,7 @@ return {
 				},
 			},
 			sources = {
-				default = { 'emoji', 'lsp', 'path', 'snippets', 'buffer', 'ripgrep', 'minuet' },
+				default = { 'emoji', 'lsp', 'path', 'snippets', 'buffer' },
 				providers = {
 					emoji = {
 						module = "blink-emoji",
@@ -77,6 +77,7 @@ return {
 						name = 'minuet',
 						module = 'minuet.blink',
 						score_offset = 2,
+						async = true,
 					},
 					copilot = {
 						name = "copilot",
@@ -137,6 +138,7 @@ return {
 			--setup lsp servers
 			require("mason").setup()
 			require("mason-lspconfig").setup({
+				automatic_installation = false,
 				ensure_installed = {
 					"lua_ls",
 					"gopls",
@@ -195,6 +197,7 @@ return {
 			lspconfig.clangd.setup {}
 			lspconfig.gleam.setup {}
 			lspconfig.denols.setup {}
+			lspconfig.svls.setup {}
 			lspconfig.gopls.setup {
 				filetypes = {
 					"go",
