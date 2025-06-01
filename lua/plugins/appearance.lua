@@ -6,7 +6,7 @@ return {
 		opts = {
 			sections = {
 				lualine_x = {
-					require('minuet.lualine'),
+					--require('minuet.lualine'),
 					'encoding',
 					'fileformat',
 					'filetype',

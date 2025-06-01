@@ -1,18 +1,6 @@
 return {
-	{ "folke/neoconf.nvim", cmd = "Neoconf", opts = {}},
+	{ "folke/neoconf.nvim", cmd = "Neoconf",                    opts = {} },
 	"folke/neodev.nvim",
-	{
-		'nvim-tree/nvim-tree.lua',
-		dependencies = { 'nvim-tree/nvim-web-devicons' },
-		opts = {},
-		keys = {
-			{
-				"<leader>fb",
-				function() require("nvim-tree.api").tree.toggle() end,
-				desc = "File Tree/Browser"
-			}
-		},
-	},
 	{
 		"folke/which-key.nvim",
 		event = "VeryLazy",
@@ -32,10 +20,24 @@ return {
 		},
 	},
 	{ 'glacambre/firenvim', build = ":call firenvim#install(0)" },
-		{
+	{
 		"mbbill/undotree",
 		keys = {
 			{ "<leader>u", "<cmd>UndotreeToggle<cr>" },
 		},
 	},
+	{
+		'stevearc/oil.nvim',
+		---@module 'oil'
+		---@type oil.SetupOpts
+		opts = {},
+		-- Optional dependencies
+		dependencies = { { "echasnovski/mini.icons", opts = {} } },
+		-- dependencies = { "nvim-tree/nvim-web-devicons" }, -- use if you prefer nvim-web-devicons
+		-- Lazy loading is not recommended because it is very tricky to make it work correctly in all situations.
+		lazy = false,
+		keys = {
+			{ "<leader>fb", "<cmd>:Oil<cr>", desc = "open oil file browser" },
+		},
+	}
 }
