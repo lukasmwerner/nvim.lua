@@ -1,3 +1,16 @@
+local function wordcount()
+    return tostring(vim.fn.wordcount().words) .. ' words'
+end
+
+local function readingtime()
+	return tostring(math.ceil(vim.fn.wordcount().words / 200.0)) .. ' min'
+end
+
+local function is_markdown()
+    return vim.bo.filetype == "markdown" or vim.bo.filetype == "asciidoc"
+end
+
+
 return {
 	{
 		'nvim-lualine/lualine.nvim',
@@ -7,6 +20,8 @@ return {
 			sections = {
 				lualine_x = {
 					--require('minuet.lualine'),
+					{ readingtime,   cond = is_markdown },
+					{ wordcount,   cond = is_markdown },
 					'encoding',
 					'fileformat',
 					'filetype',

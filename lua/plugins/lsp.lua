@@ -23,25 +23,16 @@ return {
 		'saghen/blink.cmp',
 		dependencies = {
 			'rafamadriz/friendly-snippets',
-			"giuxtaposition/blink-cmp-copilot",
-			"mikavilpas/blink-ripgrep.nvim",
 			"moyiz/blink-emoji.nvim",
+			"xzbdmw/colorful-menu.nvim",
 		},
 		version = '*',
 		---@module 'blink.cmp'
 		---@type blink.cmp.Config
+
 		opts = {
 			keymap = { preset = 'default' },
 			signature = { enabled = true },
-			appearance = {
-				use_nvim_cmp_as_default = true,
-				nerd_font_variant = 'mono',
-				kind_icons = {
-					Ollama = '',
-					gemini = '',
-					ripgrep = ''
-				},
-			},
 			sources = {
 				default = { 'emoji', 'lsp', 'path', 'snippets', 'buffer' },
 				providers = {
@@ -59,61 +50,29 @@ return {
 							)
 						end,
 					},
-					ripgrep = {
-						module = "blink-ripgrep",
-						name = "Ripgrep",
-						transform_items = function(_, items)
-							for _, item in ipairs(items) do
-								-- example: append a description to easily distinguish rg results
-								item.labelDetails = {
-									description = "(rg)",
-								}
-								item.kind_name = 'ripgrep'
-							end
-							return items
-						end,
-					},
-					minuet = {
-						name = 'minuet',
-						module = 'minuet.blink',
-						score_offset = 2,
-						async = true,
-					},
-					copilot = {
-						name = "copilot",
-						module = "blink-cmp-copilot",
-						async = true,
+				},
+			},
+			completion = {
+				menu = {
+					draw = {
+						-- We don't need label_description now because label and label_description are already
+						-- combined together in label by colorful-menu.nvim.
+						columns = { { "kind_icon" }, { "label", gap = 1 } },
+						components = {
+							label = {
+								text = function(ctx)
+									return require("colorful-menu").blink_components_text(ctx)
+								end,
+								highlight = function(ctx)
+									return require("colorful-menu").blink_components_highlight(ctx)
+								end,
+							},
+						},
 					},
 				},
 			},
 		},
 		opts_extend = { "sources.default" }
-	},
-	{
-		"xzbdmw/colorful-menu.nvim",
-		config = function()
-			require("blink.cmp").setup({
-				completion = {
-					menu = {
-						draw = {
-							-- We don't need label_description now because label and label_description are already
-							-- combined together in label by colorful-menu.nvim.
-							columns = { { "kind_icon" }, { "label", gap = 1 } },
-							components = {
-								label = {
-									text = function(ctx)
-										return require("colorful-menu").blink_components_text(ctx)
-									end,
-									highlight = function(ctx)
-										return require("colorful-menu").blink_components_highlight(ctx)
-									end,
-								},
-							},
-						},
-					},
-				},
-			})
-		end
 	},
 	{
 		"neovim/nvim-lspconfig",
@@ -132,7 +91,6 @@ return {
 			},
 		},
 		config = function()
-			local lspconfig = require('lspconfig')
 			local capabilities = require('blink.cmp').get_lsp_capabilities()
 
 			--setup lsp servers
@@ -141,34 +99,22 @@ return {
 				automatic_installation = false,
 				ensure_installed = {
 					"lua_ls",
+					"tinymist",
 					"gopls",
-					"tinymist"
 				},
-				handlers = {
-					function(server_name) -- default handler (auto provides our capabilities)
-						require("lspconfig")[server_name].setup {
-							capabilities = capabilities
-						}
-					end,
-					["html"] = function()
-						local lspconfig = require("lspconfig")
-						lspconfig.html.setup {
-							capabilities = capabilities,
-							filetypes = { "html", "templ" },
-						}
-					end,
-					["htmx"] = function()
-						local lspconfig = require("lspconfig")
-						lspconfig.htmx.setup {
-							capabilities = capabilities,
-							filetypes = { "html", "templ" },
-						}
-					end,
-				},
+				automatic_enable = false,
 			}) -- end mason-lspconfig setup
 
 			-- manual server install
-			lspconfig.harper_ls.setup {
+			vim.lsp.config.harper_ls = {
+				settings = {
+					["harper-ls"] = {
+						linters = {
+							ToDoHyphen = false,
+						},
+					},
+				},
+				-- cmd = vim.lsp.rpc.connect("127.0.0.1", 4000),
 				filetypes = {
 					'html',
 					'typst',
@@ -190,15 +136,7 @@ return {
 					'mail',
 				},
 			}
-			lspconfig.superhtml.setup {
-				filetypes = { 'superhtml', 'html' }
-			}
-			lspconfig.templ.setup {}
-			lspconfig.clangd.setup {}
-			lspconfig.gleam.setup {}
-			lspconfig.denols.setup {}
-			lspconfig.svls.setup {}
-			lspconfig.gopls.setup {
+			vim.lsp.config.gopls = {
 				filetypes = {
 					"go",
 					"gomod",
@@ -212,9 +150,9 @@ return {
 					"gotmpl"
 				},
 			}
-			lspconfig.tailwindcss.setup({
+			vim.lsp.config.tailwindcss = {
 				capabilities = capabilities,
-				filetypes = { "templ", "astro", "javascript", "typescript", "react" },
+				filetypes = { "templ", "astro", "javascript", "typescript", "react", "svelte" },
 				settings = {
 					tailwindCSS = {
 						includeLanguages = {
@@ -222,8 +160,26 @@ return {
 						},
 					},
 				},
+			}
+
+			vim.lsp.enable({
+				'harper_ls',
+				'superhtml',
+				'ts_ls',
+				'lua_ls',
+				'tinymist',
+				'rust_analyzer',
+				'templ',
+				'clangd',
+				'gleam',
+				'gopls',
+				'tailwindcss',
+				'svelte',
+				--'basedpyright',
 			})
 
+			--lspconfig.htmx.setup {}
+			-- lspconfig.denols.setup {}
 
 			vim.diagnostic.config({
 				--virtual_text = true,

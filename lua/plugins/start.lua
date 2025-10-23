@@ -39,5 +39,12 @@ return {
 		keys = {
 			{ "<leader>fb", "<cmd>:Oil<cr>", desc = "open oil file browser" },
 		},
+	},
+	{
+		'IogaMaster/neocord',
+		event = "VeryLazy",
+		opts = {
+			neovim_image_text = "the best editor ever",
+		},
 	}
 }
