@@ -164,17 +164,22 @@ return {
 
 			vim.lsp.enable({
 				'harper_ls',
-				'superhtml',
-				'ts_ls',
 				'lua_ls',
-				'tinymist',
 				'rust_analyzer',
-				'templ',
 				'clangd',
 				'gleam',
 				'gopls',
+				'tinymist',
+				-- Web Tech
+				'ts_ls',
+				'superhtml',
+				'templ',
 				'tailwindcss',
 				'svelte',
+
+				-- Python
+				'pylsp',
+				--'ruff',
 				--'basedpyright',
 			})
 
