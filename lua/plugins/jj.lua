@@ -1,0 +1,13 @@
+return {
+	{
+		"julienvincent/hunk.nvim",
+		cmd = { "DiffEditor" },
+		config = function()
+			require("hunk").setup()
+		end,
+		dependencies = {
+			"MunifTanjim/nui.nvim",
+			"nvim-tree/nvim-web-devicons"
+		},
+	},
+}
